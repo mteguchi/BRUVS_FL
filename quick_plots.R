@@ -40,3 +40,5 @@ ggplot(data = data_2016) +
 #  theme(legend.position = "none")
 
 wrong.coords <- data_2016 %>% filter(set_long <= -81)
+
+FL1_001 <- BRUVS_data %>% filter(set_code == "FL1_001")

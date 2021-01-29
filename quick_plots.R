@@ -30,7 +30,7 @@ BRUVS_data <- read_csv("data/FLkeys_maxn_obs.csv",
 
 
 ggplot(data = BRUVS_data) + 
-  geom_point(aes(x = set_long, y = set_lat, color = trip_year)) +
+  geom_point(aes(x = set_long, y = set_lat, color = as.factor(trip_year))) 
   theme(legend.position = "none")
 
 BRUVS_data %>% filter(trip_year == 2016) -> data_2016
@@ -38,9 +38,3 @@ BRUVS_data %>% filter(trip_year == 2016) -> data_2016
 ggplot(data = data_2016) + 
   geom_point(aes(x = set_long, y = set_lat)) 
 #  theme(legend.position = "none")
-
-
-head(too.south) %>% data.frame()
-
-FL1_004 <- BRUVS_data %>% filter(set_code == "FL1_004")
-summary(FL1_004)

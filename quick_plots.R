@@ -38,3 +38,5 @@ BRUVS_data %>% filter(trip_year == 2016) -> data_2016
 ggplot(data = data_2016) + 
   geom_point(aes(x = set_long, y = set_lat)) 
 #  theme(legend.position = "none")
+
+wrong.coords <- data_2016 %>% filter(set_long <= -81)

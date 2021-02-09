@@ -116,12 +116,12 @@ The sf package provides easy ways to accomplish all these things. Take a look at
 
 Also, here is a similar question asked to StackOverflow: https://stackoverflow.com/questions/29736577/how-to-convert-data-frame-to-spatial-coordinates
 
-crs (coordinate reference system) needs to be figured out - I assume this was WGS84, which is the most common one when using GPS to record lat/lon. Y
+crs (coordinate reference system) needs to be figured out - I assume this was WGS84, which is the most common one when using GPS to record lat/lon. 
 ```{r}
 
 BRUVS_sf <- st_as_sf(x = BRUVS_data, 
-                        coords = c("set_long", "set_lat"),
-                        crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0")
+                     coords = c("set_long", "set_lat"),
+                     crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0")
 
 str(BRUVS_sf)
 

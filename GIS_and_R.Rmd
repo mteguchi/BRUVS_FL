@@ -1,0 +1,78 @@
+---
+title: "Playing with GIS files in R"
+output: html_notebook
+---
+
+This document describes how to import GIS files into R and create pretty maps. There are many useful packages out there for doing spatial data manipulation and analyses. I only know a few. 
+
+Some packages that I use for data manipulations and plotting:
+
+```{r}
+library(tidyverse)   # for data manipulation
+library(ggplot2)     # for plotting
+library(sf)          # spatial data manipulation
+library(lubridate)   # dealing with date and time
+
+```
+
+GIS data were obtained from here:
+https://geodata.dep.state.fl.us/
+https://shoreline.noaa.gov/data/datasheets/usgs.html
+
+I unzipped downloaded files and moved the resulting folders into this project folder with a new folder called "shapefiles." 
+
+```{r}
+# To bring in shapefiles into the workspace, we specify the folder that contains GIS files
+# each GIS object comes with multiple files but shares one name.
+# If one folder contains multiple objects, specify it in the 
+# layer argument:
+# FL baseline from fl_zip on the Gulf of Mexico side
+FL_baseline_GofM <- st_read("shapefiles/fl_zip_GofM", layer = "fl_baseline")
+FL_1998_2001_GofM  <- st_read("shapefiles/fl_zip_GofM", layer = "fl1998_2001")
+
+#FL_transects_lt_GofM  <- st_read("shapefiles/fl_zip_GofM", layer = "fl_transects_lt")
+
+# FL baseline from fl_zip on the Atlantic side
+FL_baseline_Atl <- st_read("shapefiles/fl_zip_Atl", layer = "fl_baseline")
+FL_1999_Atl  <- st_read("shapefiles/fl_zip_Atl", layer = "fl1999")
+
+#FL_transects_lt_Atl  <- st_read("shapefiles/fl_zip_Atl", layer = "fl_transects_lt")
+
+# take a look at it
+p.1 <- ggplot() +
+  geom_sf(data = FL_baseline_GofM) +
+  geom_sf(data = FL_baseline_Atl) +
+  geom_sf(data = FL_1998_2001_GofM) + 
+  geom_sf(data = FL_1999_Atl)
+p.1
+
+```
+
+Not a very interesting plot...
+
+```{r}
+# They misspelled "Research" with no second e... Took me a while to figure out why it was returning an error
+FL_NERR <- st_read("shapefiles/FL_NERR", 
+                  layer = "Florida_National_Estuarine_Resarch_Reserves__NERR__Boundaries")
+                    
+                    #"Florida_National_Estuarine_Research_Reserves__NERR__Boundaries")
+
+FL_StParks <- st_read("shapefiles/Florida_State_Parks",
+                      layer = "Florida_State_Parks_Boundaries")
+
+Coastal_Inlets <- st_read("shapefiles/Coastal_Inlets_Management",
+                          layer = "Coastal_Inlets_Management")
+
+p.2 <- ggplot() +
+  geom_sf(data = FL_baseline_GofM) +
+  geom_sf(data = FL_baseline_Atl) +
+  geom_sf(data = FL_NERR, color = "red") +
+  geom_sf(data = FL_StParks, color = "green") +
+  geom_sf(data = Coastal_Inlets, color = "orange")
+
+
+p.2
+```
+
+Need more examples ... 
+

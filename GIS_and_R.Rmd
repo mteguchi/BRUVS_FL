@@ -11,7 +11,7 @@ Some packages that I use for data manipulations and plotting:
 library(tidyverse)   # for data manipulation
 library(ggplot2)     # for plotting
 library(sf)          # spatial data manipulation
-library(lubridate)   # dealing with date and time
+#library(lubridate)   # dealing with date and time
 library(readr)
 
 ```
@@ -23,6 +23,8 @@ https://shoreline.noaa.gov/data/datasheets/usgs.html
 I unzipped downloaded files and moved the resulting folders into this project folder with a new folder called "shapefiles." 
 
 ```{r}
+#base::setdiff
+
 # To bring in shapefiles into the workspace, we specify the folder that contains GIS files
 # each GIS object comes with multiple files but shares one name.
 # If one folder contains multiple objects, specify it in the 
@@ -33,7 +35,7 @@ FL_1998_2001_GofM  <- st_read("shapefiles/fl_zip_GofM", layer = "fl1998_2001")
 
 #FL_transects_lt_GofM  <- st_read("shapefiles/fl_zip_GofM", layer = "fl_transects_lt")
 
-# FL baseline from fl_zip on the Atlantic side
+# FL baseline from fl_zip on the Atlantic side #
 FL_baseline_Atl <- st_read("shapefiles/fl_zip_Atl", layer = "fl_baseline")
 FL_1999_Atl  <- st_read("shapefiles/fl_zip_Atl", layer = "fl1999")
 
@@ -141,6 +143,9 @@ We can extract some specific species...
 ```{r}
 BRUVS_sf %>% filter(genus == "Sphyrna") -> BRUVS_Sphyrna_sf
 
+# equivalent
+#BRUVS_Sphyrna_sf <- filter(BRUVS_sf, genus == "Sphyrna")
+
 p.4 <- p.2 + 
   geom_sf(data = BRUVS_Sphyrna_sf,
           aes(color = as.factor(trip_year), size = maxn))
@@ -152,8 +157,9 @@ We really don't need the entire FL for these plots... and add maxN to the plot a
 ```{r}
 
 p.4 + coord_sf(xlim = c(-82, -80), ylim = c(24, 25.5)) +
-  labs(title = "Sphyrna") + 
-  labs(color = "Year", size = "maxN")
+  labs(title = "Sphyrna", color = "Year", size = "maxN") 
+  #theme_classic(plot.background = element_rect(fill="lightblue"))
+  #labs(color = "Year", size = "maxN")
 
 ```
 

@@ -12,6 +12,7 @@ library(tidyverse)   # for data manipulation
 library(ggplot2)     # for plotting
 library(sf)          # spatial data manipulation
 library(lubridate)   # dealing with date and time
+library(readr)
 
 ```
 
@@ -74,5 +75,87 @@ p.2 <- ggplot() +
 p.2
 ```
 
-Need more examples ... 
+
+How do we add our own data to these plots?
+
+Save the original text data file into the data sub directory within the project folder. 
+
+Then, bring in the data. I use read_csv in the readr package, which requires you to define the type of each column. This may seem a bit of extra work but it's good to make sure what's coming in from a data file is what you expect. This is one way to check for errors in data. 
+
+```{r}
+
+col_defs <- cols(location_name = col_character(),
+                 site_name = col_character(),
+                 trip_code = col_character(),
+                 trip_year = col_integer(),
+                 reef_name = col_character(),
+                 reef_type = col_character(),
+                 set_code = col_character(),
+                 maxn = col_integer(),
+                 common_name = col_character(),
+                 genus = col_character(),
+                 species = col_character(),
+                 species_group = col_character(),
+                 family = col_character(),
+                 event_time_mil = col_integer(),
+                 event_time_mins = col_character(),
+                 set_lat = col_double(),
+                 set_long = col_double(),
+                 visibility = col_integer(),
+                 depth = col_double(),
+                 bait = col_character(),
+                 current_flow_estimated = col_character())
+
+BRUVS_data <- read_csv("data/FLkeys_maxn_obs.csv", 
+                       col_types = col_defs)
+```
+
+We then convert these data to spatial points. 
+
+The sf package provides easy ways to accomplish all these things. Take a look at their help files, which can be found here: https://r-spatial.github.io/sf/articles/sf1.html
+
+Also, here is a similar question asked to StackOverflow: https://stackoverflow.com/questions/29736577/how-to-convert-data-frame-to-spatial-coordinates
+
+crs (coordinate reference system) needs to be figured out - I assume this was WGS84, which is the most common one when using GPS to record lat/lon. Y
+```{r}
+
+BRUVS_sf <- st_as_sf(x = BRUVS_data, 
+                        coords = c("set_long", "set_lat"),
+                        crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0")
+
+str(BRUVS_sf)
+
+```
+
+
+```{r}
+p.3 <- p.2 + 
+  geom_sf(data = BRUVS_sf,
+          aes(color = as.factor(trip_year)))
+
+p.3
+```
+
+We can extract some specific species...
+
+```{r}
+BRUVS_sf %>% filter(genus == "Sphyrna") -> BRUVS_Sphyrna_sf
+
+p.4 <- p.2 + 
+  geom_sf(data = BRUVS_Sphyrna_sf,
+          aes(color = as.factor(trip_year), size = maxn))
+p.4
+```
+
+We really don't need the entire FL for these plots... and add maxN to the plot and change the legend titles. 
+
+```{r}
+
+p.4 + coord_sf(xlim = c(-82, -80), ylim = c(24, 25.5)) +
+  labs(title = "Sphyrna") + 
+  labs(color = "Year", size = "maxN")
+
+```
+
+
 

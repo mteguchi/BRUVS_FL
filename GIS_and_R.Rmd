@@ -195,5 +195,7 @@ p.6 <- p.5 + theme(panel.background = element_rect(fill = "lightcyan",
                                 size = 0.5, linetype = "solid")) + 
   scale_x_continuous(breaks = c(-82, -81, -80)) + 
   scale_y_continuous(breaks = c(24, 24.5, 25, 25.5))
+
+p.6
 ```
 

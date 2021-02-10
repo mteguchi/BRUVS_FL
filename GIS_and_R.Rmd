@@ -156,12 +156,44 @@ We really don't need the entire FL for these plots... and add maxN to the plot a
 
 ```{r}
 
-p.4 + coord_sf(xlim = c(-82, -80), ylim = c(24, 25.5)) +
+p.5 <- p.4 + coord_sf(xlim = c(-82, -80), ylim = c(24, 25.55)) +
   labs(title = "Sphyrna", color = "Year", size = "maxN") 
   #theme_classic(plot.background = element_rect(fill="lightblue"))
   #labs(color = "Year", size = "maxN")
 
+p.5
+```
+
+Converting datum
+
+The sf package provides a function for this: https://r-spatial.github.io/sf/reference/st_transform.html
+
+```{r}
+
+# FL_1998_2001_GofM was in NAD83
+# FL_NERR was in WGS 84 - here I use st_crs function to retrieve the crs then update FL_1998_2001_GofM
+FL_1998_2001_GofM_WGS84 <- st_transform(FL_1998_2001_GofM,
+                                        crs = st_crs(FL_NERR))  # use st_crs()
+
+st_crs(FL_1998_2001_GofM)
+
 ```
 
 
+```{r}
+st_crs(FL_1998_2001_GofM_WGS84)
+
+```
+
+It's that easy! 
+
+Changing the ocean color and reducing the number of tick marks:
+
+```{r}
+p.6 <- p.5 + theme(panel.background = element_rect(fill = "lightcyan",
+                                colour = "lightcyan",
+                                size = 0.5, linetype = "solid")) + 
+  scale_x_continuous(breaks = c(-82, -81, -80)) + 
+  scale_y_continuous(breaks = c(24, 24.5, 25, 25.5))
+```
 

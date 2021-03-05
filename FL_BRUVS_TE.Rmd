@@ -1,0 +1,195 @@
+
+Within the project folder, I create a "data" folder and store all data in it.
+
+```{r}
+#Get Started
+rm(list = ls())   # clear the workspace.
+# bring in some libraries
+library(tidyverse)
+library(readr)
+
+# define the incoming columns:
+cols_variables <- cols(OBJECTID = col_integer(),  
+                       location_name = col_character(),
+                       site_name = col_character(),
+                       trip_code = col_character(),
+                       trip_year = col_integer(), 
+                       reef_name = col_character(),
+                       reef_type = col_character(),
+                       set_code = col_character(),
+                       maxn = col_integer(),
+                       common_name = col_character(),
+                       genus = col_character(),
+                       species = col_character(),
+                       species_group = col_character(),
+                       family = col_character(),
+                       event_time_mil = col_integer(),
+                       event_time_mins = col_character(),
+                       set_lat = col_double(),
+                       set_long = col_double(),
+                       visibility = col_integer(),
+                       depth = col_double(),
+                       bait = col_character(),
+                       current_flow_estimated = col_character(),
+                       FID_COASTLINE = col_integer(),
+                       DIST_COASTLINE = col_double(),
+                       FID_MPA = col_integer(),
+                       DIST_MPA = col_double(),
+                       BUFF_DIST = col_double(),
+                       ORIG_FID = col_integer(),
+                       Shape_Length = col_double(),
+                       Shape_Area = col_double(),
+                       SUM_Area_SQUAREMETERS = col_double(),
+                       Percentage_Reef_Habitat_100m = col_double())
+
+#setwd("~/Desktop/Capstone Keys/Keys Data/FL_BRUVS")
+#BRUVS_variables <- read.csv("BRUVS.Variables.csv")
+BRUVS_variables <- read_csv("data/BRUVS.Variables.csv", 
+                            col_types = cols_variables)
+
+# I use tidyverse's pipe operations to take the original data.frame
+BRUVS_variables %>% filter(species_group == "Shark" | species_group == "Ray") %>%
+  mutate(species = as.factor(species)) -> elasmo   # convert species into a factor variable
+
+levels(elasmo$species)  
+#rename species groups for sharks and rays to elasmo
+# elasmo <- BRUVS_variables[BRUVS_variables$species_group== "Shark" | BRUVS_variables$species_group== "Ray", ]
+# elasmo$species <- as.factor(elasmo$species) #Fix species column to be a factor
+# elasmo
+#need to fix the rest of the columns that need to be factors, change time to character
+#Species column nd dealing with unidentified species. 
+#unique(elasmo$species)
+elasmo[which(elasmo$species=="sp."), ] #call up "sp."
+which(elasmo$genus=="Rhizoprionodon") #call up sharpnose genus
+elasmo[which(elasmo$genus=="Rhizoprionodon"), ] #is this the same things as line 29?
+levels(elasmo$species) <- c(levels(elasmo$species), "sharpnose") #what is a level? 
+elasmo$species[which(elasmo$genus=="Rhizoprionodon")] <- "sharpnose" #rename genus to sharpnose becuase none were identified at the species level. 
+
+#call up the data set without the last unidentified species and rename elasmo (note: ! stands for not equal to)
+elasmo <- elasmo[which(elasmo$species!="sp."), ]
+#elasmo[which(elasmo$species=="sp."), ]
+```
+
+
+```{r}
+# Looking at the data structure 
+# View(BRUVS_variables)
+# ls(BRUVS_variables)
+
+#how many BRUVS there are
+length(unique(BRUVS_variables$set_code))
+```
+
+
+
+```{r}
+#histograms of individual data sets for numeric varaibles
+hist(BRUVS_variables$depth)
+hist(BRUVS_variables$DIST_MPA)
+hist(BRUVS_variables$DIST_COASTLINE)
+hist(BRUVS_variables$depth)
+hist(BRUVS_variables$visibility)
+# 
+#need to fix this! Is it not working because its a decimal and time? 
+
+#qqnorm plots variables
+qqnorm(BRUVS_variables$depth)
+qqnorm(BRUVS_variables$DIST_MPA)
+qqnorm(BRUVS_variables$DIST_COASTLINE)
+qqnorm(BRUVS_variables$depth)
+qqnorm(BRUVS_variables$visibility)
+```
+
+event_time_mins in a different format, so we need to convert it into minutes.
+Or convert the milliseconds in minutes. The latter is easier because event_time_mil is a numeric field.
+
+```{r}
+# one way to do this is to split the event_time_mins in to three different fields 
+tmp.0 <- BRUVS_variables[1:20,]
+tmp.0 %>% separate(col = event_time_mins, 
+                   into = c("event_time_min", "event_time_sec", "event_time_millisec"),
+                   sep = ":") %>%
+  mutate(event_time_in_min = as.numeric(event_time_min) + 
+           as.numeric(event_time_sec)/60 + 
+           as.numeric(event_time_millisec)/(60*1000)) -> tmp.1
+
+# another way is to use millisecond column to compute min
+
+tmp.0 %>% mutate(event_time_in_min = event_time_mil/(1000 * 60)) -> tmp.2
+
+# compare the two methods and see if they are different. If they are the same, 
+# the sum of the differences should be zero. 
+sum(tmp.1$event_time_in_min - tmp.2$event_time_in_min, na.rm = T)
+
+```
+
+
+```{r}
+BRUVS_variables %>% mutate(event_time_in_min = event_time_mil/(1000 * 60)) -> tmp.2
+hist(tmp.2$event_time_in_min)
+```
+
+
+```{r}
+#how many BRUVS there are 
+length(unique(BRUVS_variables$set_code))
+#336
+
+#how many BRUVS saw elasmos
+length(unique(elasmo$set_code))
+#165
+
+#counts of observations
+maxn.freq <-  table(elasmo$maxn)
+visibility.freq <- table(elasmo$visibility)
+year.freq <- table(BRUVS_variables$trip_year)
+species.freq <- table(elasmo$species)
+com_name.freq <- table(elasmo$common_name)
+
+maxn.freq
+visibility.freq
+year.freq
+species.freq
+com_name.freq
+
+#I think we need to change the reef name because some regions overlap but have different names
+
+reef_freq <- table(BRUVS_variables$reef_name)
+reef_freq
+
+#bar plot of species by common name and scientific 
+#I think we might need to change some of the common names to be consistent (ex: hammerhead, great hammerhaed)
+barplot(com_name.freq, main="common_name",
+   xlab="Number of Individuals Identified")
+barplot(species.freq, main="species",
+   xlab="Number of Individuals Identified")
+
+```
+
+
+```{r}
+#plots of variables. Are these the right types of plots to use? Why does sp. still show up as a column? 
+plot(elasmo$species, elasmo$maxn)
+plot(elasmo$species, elasmo$depth)
+plot(elasmo$species, elasmo$DIST_MPA)
+plot(elasmo$species, elasmo$DIST_COASTLINE)
+plot(elasmo$species, elasmo$visibility)
+plot(elasmo$species, elasmo$Percentage_Reef_Habitat_100m)
+
+plot(elasmo$depth, elasmo$maxn, xlab = "depth (m)", ylab = "maxn")
+
+#Can I plot depth and number of species seen? Same with % of reef, visibility, etc...
+
+#need to plot other variables
+
+```
+
+```{r}
+
+#is this something I need to do? 
+cor.test(elasmo$maxn, elasmo$depth)
+Model1 <- lm(elasmo$maxn~elasmo$depth)
+summary(Model1)
+
+```
+
